@@ -19,6 +19,8 @@ namespace TestApp
 			{
 				hotkey.Hook();
 			}
+
+			UrMomForm.Instance.ShowDialog();
 		}
 
 		private Hotkey[] hotkeys;

@@ -52,54 +52,66 @@ namespace SharpKey
 		{
 			if (!removed)
 			{
-				if (RegisterHotKey(windowHook, id, fsModifier, key))
+				if (!enabled)
 				{
-					if (notify)
-						MessageBox.Show($"Successfully hooked hotkey to:\n\n" +
-							$"WinHook: {windowHook}\n" +
-							$"Id: {id}\n" +
-							$"FSModifier: {passedFSModifier}\n" +
-							$"Key: {passedKey}\n\n" +
-							$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
-							"Hotkey Successfully Created and Hooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					if (RegisterHotKey(windowHook, id, fsModifier, key) && !enabled)
+					{
+						if (notify)
+							MessageBox.Show($"Successfully hooked hotkey to:\n\n" +
+								$"WinHook: {windowHook}\n" +
+								$"Id: {id}\n" +
+								$"FSModifier: {passedFSModifier}\n" +
+								$"Key: {passedKey}\n\n" +
+								$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
+								"Hotkey Successfully Created and Hooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-					enabled = true;
-				}
-				else if (!RegisterHotKey(windowHook, id, fsModifier, key))
-				{
-					if (notify)
-						MessageBox.Show($"Failed to hook hotkey to:\n\n" +
-							$"WinHook: {windowHook}\n" +
-							$"Id: {id}\n" +
-							$"FSModifier: {passedFSModifier}\n" +
-							$"Key: {passedKey}\n\n" +
-							$"Please try again later, or use different inputs.",
-							"Hotkey Failed To Hook", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						enabled = true;
+					}
+					else if (!RegisterHotKey(windowHook, id, fsModifier, key))
+					{
+						if (notify)
+							MessageBox.Show($"Failed to hook hotkey to:\n\n" +
+								$"WinHook: {windowHook}\n" +
+								$"Id: {id}\n" +
+								$"FSModifier: {passedFSModifier}\n" +
+								$"Key: {passedKey}\n\n" +
+								$"Please try again later, or use different inputs.",
+								"Hotkey Failed To Hook", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-					enabled = false;
+						enabled = false;
+					}
+					else
+					{
+						MessageBox.Show("No action was invoked and no hook was registered/created.", "Nothing Happened",
+							MessageBoxButtons.OK, MessageBoxIcon.Information);
+					}
 				}
-				else
-				{
-					MessageBox.Show("Hotkey never hooked or failed to hook.", "Nothing Happened",
-						MessageBoxButtons.OK, MessageBoxIcon.Information);
-				}
+				else if (enabled)
+					MessageBox.Show("Cannot hook the same hotkey to the same window twice.", "Cannot Hook Twice",
+						MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 		public void Unhook(bool notify = true)
 		{
 			if (!removed)
 			{
-				if (notify)
-					MessageBox.Show($"Successfully unhooked hotkey from:\n\n" +
-						$"WinHook: {windowHook}\n" +
-						$"Id: {id}\n" +
-						$"FSModifier: {passedFSModifier}\n" +
-						$"Key: {passedKey}\n\n" +
-						$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
-						"Hotkey Successfully Unhooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				if (enabled)
+				{
+					if (notify)
+						MessageBox.Show($"Successfully unhooked hotkey from:\n\n" +
+							$"WinHook: {windowHook}\n" +
+							$"Id: {id}\n" +
+							$"FSModifier: {passedFSModifier}\n" +
+							$"Key: {passedKey}\n\n" +
+							$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
+							"Hotkey Successfully Unhooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-				UnregisterHotKey(windowHook, id);
-				enabled = false;
+					UnregisterHotKey(windowHook, id);
+					enabled = false;
+				}
+				else if (!enabled)
+					MessageBox.Show("Cannot unhook the same hotkey frome the same window twice.", "Cannot Unhook Twice",
+						MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 		public void Remove(bool notify = true)
