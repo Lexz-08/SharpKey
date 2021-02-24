@@ -59,7 +59,7 @@ namespace SharpKey
 							$"WinHook: {windowHook}\n" +
 							$"Id: {id}\n" +
 							$"FSModifier: {passedFSModifier}\n" +
-							$"Key(s): {passedKey}\n\n" +
+							$"Key: {passedKey}\n\n" +
 							$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
 							"Hotkey Successfully Created and Hooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -72,7 +72,7 @@ namespace SharpKey
 							$"WinHook: {windowHook}\n" +
 							$"Id: {id}\n" +
 							$"FSModifier: {passedFSModifier}\n" +
-							$"Key(s): {passedKey}\n\n" +
+							$"Key: {passedKey}\n\n" +
 							$"Please try again later, or use different inputs.",
 							"Hotkey Failed To Hook", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
@@ -94,7 +94,7 @@ namespace SharpKey
 						$"WinHook: {windowHook}\n" +
 						$"Id: {id}\n" +
 						$"FSModifier: {passedFSModifier}\n" +
-						$"Key(s): {passedKey}\n\n" +
+						$"Key: {passedKey}\n\n" +
 						$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
 						"Hotkey Successfully Unhooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -111,7 +111,7 @@ namespace SharpKey
 						$"WinHook: {windowHook}\n" +
 						$"Id: {id}\n" +
 						$"FSModifier: {passedFSModifier}\n" +
-						$"Key(s): {passedKey}",
+						$"Key: {passedKey}",
 						"Hotkey Successfully Unhooked and Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
 				removed = true;
