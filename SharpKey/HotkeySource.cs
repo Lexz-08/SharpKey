@@ -1,0 +1,118 @@
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+namespace SharpKey
+{
+	public enum FSModifiers
+	{
+		Alt     = 0x0001,
+		Control = 0x0002,
+		Shift   = 0x0004,
+	}
+
+
+
+	public class Hotkey
+	{
+		public const uint HOTKEY = 0x0312;
+
+		private IntPtr windowHook;
+		private int id;
+		private uint fsModifier;
+		private uint key;
+		private bool enabled = false;
+		private FSModifiers passedFSModifier;
+		private Keys passedKey;
+
+		public IntPtr WindowHook => windowHook;
+		public int Id => id;
+		public IntPtr Id_Ptr => (IntPtr)id;
+		public uint FSModifier => fsModifier;
+		public uint Key => key;
+		public bool Enabled => enabled;
+
+		public Hotkey(IntPtr winHook, int id, FSModifiers modifier, Keys key)
+		{
+			windowHook = winHook;
+			this.id = id;
+			fsModifier = (uint)modifier;
+			this.key = (uint)key;
+
+			passedFSModifier = modifier;
+			passedKey = key;
+		}
+
+		[DllImport("user32")]
+		private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+		[DllImport("user32")]
+		private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+		public void Hook(bool notify = true)
+		{
+			if (RegisterHotKey(windowHook, id, fsModifier, key))
+			{
+				if (notify)
+					MessageBox.Show($"Successfully hooked hotkey to:\n\n" +
+						$"WinHook: {windowHook}\n" +
+						$"Id: {id}\n" +
+						$"FSModifier: {passedFSModifier}\n" +
+						$"Key(s): {passedKey}\n\n" +
+						$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
+						"Hotkey Successfully Created and Hooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+				enabled = true;
+			}
+			else if (!RegisterHotKey(windowHook, id, fsModifier, key))
+			{
+				if (notify)
+					MessageBox.Show($"Failed to hook hotkey to:\n\n" +
+						$"WinHook: {windowHook}\n" +
+						$"Id: {id}\n" +
+						$"FSModifier: {passedFSModifier}\n" +
+						$"Key(s): {passedKey}\n\n" +
+						$"Please try again later, or use different inputs.",
+						"Hotkey Failed To Hook", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+				enabled = false;
+			}
+			else
+			{
+				MessageBox.Show("Hotkey never hooked or failed to hook.", "Nothing Happened",
+					MessageBoxButtons.OK, MessageBoxIcon.Information);
+			}
+		}
+		public void Unhook(bool notify = true)
+		{
+			if (notify)
+				MessageBox.Show($"Successfully unhooked hotkey from:\n\n" +
+					$"WinHook: {windowHook}\n" +
+					$"Id: {id}\n" +
+					$"FSModifier: {passedFSModifier}\n" +
+					$"Key(s): {passedKey}\n\n" +
+					$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
+					"Hotkey Successfully Unhooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+			UnregisterHotKey(windowHook, id);
+			enabled = false;
+		}
+		public void Remove(bool notify = true)
+		{
+			if (notify)
+				MessageBox.Show($"Successfully unhooked and deleted hotkey:\n\n" +
+					$"WinHook: {windowHook}\n" +
+					$"Id: {id}\n" +
+					$"FSModifier: {passedFSModifier}\n" +
+					$"Key(s): {passedKey}",
+					"Hotkey Successfully Unhooked and Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+			if (enabled) UnregisterHotKey(WindowHook, id);
+		}
+
+		public static Hotkey Create(IntPtr winHook, int id, FSModifiers fsModifier, Keys key)
+		{
+			return new Hotkey(winHook, id, fsModifier, key);
+		}
+	}
+}
