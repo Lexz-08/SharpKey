@@ -11,8 +11,6 @@ namespace SharpKey
 		Shift   = 0x0004,
 	}
 
-
-
 	public class Hotkey
 	{
 		public const uint HOTKEY = 0x0312;
@@ -24,6 +22,7 @@ namespace SharpKey
 		private bool enabled = false;
 		private FSModifiers passedFSModifier;
 		private Keys passedKey;
+		private bool removed = false;
 
 		public IntPtr WindowHook => windowHook;
 		public int Id => id;
@@ -51,63 +50,78 @@ namespace SharpKey
 
 		public void Hook(bool notify = true)
 		{
-			if (RegisterHotKey(windowHook, id, fsModifier, key))
+			if (!removed)
+			{
+				if (RegisterHotKey(windowHook, id, fsModifier, key))
+				{
+					if (notify)
+						MessageBox.Show($"Successfully hooked hotkey to:\n\n" +
+							$"WinHook: {windowHook}\n" +
+							$"Id: {id}\n" +
+							$"FSModifier: {passedFSModifier}\n" +
+							$"Key(s): {passedKey}\n\n" +
+							$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
+							"Hotkey Successfully Created and Hooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+					enabled = true;
+				}
+				else if (!RegisterHotKey(windowHook, id, fsModifier, key))
+				{
+					if (notify)
+						MessageBox.Show($"Failed to hook hotkey to:\n\n" +
+							$"WinHook: {windowHook}\n" +
+							$"Id: {id}\n" +
+							$"FSModifier: {passedFSModifier}\n" +
+							$"Key(s): {passedKey}\n\n" +
+							$"Please try again later, or use different inputs.",
+							"Hotkey Failed To Hook", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+					enabled = false;
+				}
+				else
+				{
+					MessageBox.Show("Hotkey never hooked or failed to hook.", "Nothing Happened",
+						MessageBoxButtons.OK, MessageBoxIcon.Information);
+				}
+			}
+		}
+		public void Unhook(bool notify = true)
+		{
+			if (!removed)
 			{
 				if (notify)
-					MessageBox.Show($"Successfully hooked hotkey to:\n\n" +
+					MessageBox.Show($"Successfully unhooked hotkey from:\n\n" +
 						$"WinHook: {windowHook}\n" +
 						$"Id: {id}\n" +
 						$"FSModifier: {passedFSModifier}\n" +
 						$"Key(s): {passedKey}\n\n" +
 						$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
-						"Hotkey Successfully Created and Hooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+						"Hotkey Successfully Unhooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-				enabled = true;
-			}
-			else if (!RegisterHotKey(windowHook, id, fsModifier, key))
-			{
-				if (notify)
-					MessageBox.Show($"Failed to hook hotkey to:\n\n" +
-						$"WinHook: {windowHook}\n" +
-						$"Id: {id}\n" +
-						$"FSModifier: {passedFSModifier}\n" +
-						$"Key(s): {passedKey}\n\n" +
-						$"Please try again later, or use different inputs.",
-						"Hotkey Failed To Hook", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+				UnregisterHotKey(windowHook, id);
 				enabled = false;
 			}
-			else
-			{
-				MessageBox.Show("Hotkey never hooked or failed to hook.", "Nothing Happened",
-					MessageBoxButtons.OK, MessageBoxIcon.Information);
-			}
-		}
-		public void Unhook(bool notify = true)
-		{
-			if (notify)
-				MessageBox.Show($"Successfully unhooked hotkey from:\n\n" +
-					$"WinHook: {windowHook}\n" +
-					$"Id: {id}\n" +
-					$"FSModifier: {passedFSModifier}\n" +
-					$"Key(s): {passedKey}\n\n" +
-					$"You can use Hook() and Unhook() to toggle it, and Remove() to remove it.",
-					"Hotkey Successfully Unhooked", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-			UnregisterHotKey(windowHook, id);
-			enabled = false;
 		}
 		public void Remove(bool notify = true)
 		{
-			if (notify)
-				MessageBox.Show($"Successfully unhooked and deleted hotkey:\n\n" +
-					$"WinHook: {windowHook}\n" +
-					$"Id: {id}\n" +
-					$"FSModifier: {passedFSModifier}\n" +
-					$"Key(s): {passedKey}",
-					"Hotkey Successfully Unhooked and Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+			if (!removed)
+			{
+				if (notify)
+					MessageBox.Show($"Successfully unhooked and deleted hotkey:\n\n" +
+						$"WinHook: {windowHook}\n" +
+						$"Id: {id}\n" +
+						$"FSModifier: {passedFSModifier}\n" +
+						$"Key(s): {passedKey}",
+						"Hotkey Successfully Unhooked and Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-			if (enabled) UnregisterHotKey(WindowHook, id);
+				removed = true;
+				if (enabled) UnregisterHotKey(WindowHook, id);
+			}
+			else
+			{
+				MessageBox.Show("This hotkey was already removed. You cannot remove it again.",
+					"Hotkey Already Removed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
 
 		public static Hotkey Create(IntPtr winHook, int id, FSModifiers fsModifier, Keys key)

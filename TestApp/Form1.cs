@@ -11,7 +11,7 @@ namespace TestApp
 
 			hotkeys = new Hotkey[]
 			{
-				Hotkey.Create(Handle, 0, FSModifiers.Alt, Keys.T),
+				Hotkey.Create(Handle, 0, FSModifiers.Alt, Keys.T | Keys.M),
 				Hotkey.Create(Handle, 1, FSModifiers.Alt, Keys.M),
 			};
 
